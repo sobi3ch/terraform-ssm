@@ -104,11 +104,11 @@ resource "tls_private_key" "ssm_demo_key" {
 }
 
 resource "aws_key_pair" "ssm_demo_key" {
-  key_name   = "ssm-demo-key"
+  key_name   = local.name
   public_key = tls_private_key.ssm_demo_key.public_key_openssh
 }
 
-output "ssm_demo_private_key_pem" {
+output "ssm_private_key_pem" {
   description = "Private key for SSH access to the EC2 instance. Store this securely!"
   value       = tls_private_key.ssm_demo_key.private_key_pem
   sensitive   = true
