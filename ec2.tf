@@ -25,7 +25,7 @@ module "ec2_instance" {
 
 module "ec2_sg" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = ">= 5.0.0"
+  version = ">= 5.3.0"
 
   name        = "ssm-demo-ec2-sg"
   description = "Allow SSM (443) and SSH (22)"
