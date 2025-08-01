@@ -29,8 +29,10 @@ module "vpc" {
   name = local.name
   cidr = local.vpc_cidr
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  enable_nat_gateway      = true
+  single_nat_gateway      = true
+  enable_dns_hostnames    = true
+  map_public_ip_on_launch = true
 
   manage_default_network_acl    = false
   manage_default_route_table    = false
