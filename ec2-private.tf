@@ -1,4 +1,30 @@
 ################################################################################
+# Security Group for SSM endpionts in private subnets
+################################################################################
+module "ssm_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = ">= 5.3.0"
+
+  name        = "ssm"
+  description = "Security group for EC2 instance with SSM access"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_with_cidr_blocks = [
+    for cidr in module.vpc.private_subnets_cidr_blocks : {
+      description = "Allow HTTPS access to SSM endpoints"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = cidr
+    }
+  ]
+
+  egress_with_cidr_blocks = []
+
+  tags = merge(local.tags, { Name = "ssm-sg" })
+}
+
+################################################################################
 # VPC Endpoints for SSM in private subnets
 ################################################################################
 resource "aws_vpc_endpoint" "ssm" {
@@ -6,7 +32,7 @@ resource "aws_vpc_endpoint" "ssm" {
   service_name        = "com.amazonaws.${local.region}.ssm"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.ec2_sg.security_group_id]
+  security_group_ids  = [module.ssm_sg.security_group_id]
   private_dns_enabled = true
   tags                = merge(local.tags, { Name = "ssm" })
 }
@@ -16,7 +42,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   service_name        = "com.amazonaws.${local.region}.ssmmessages"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.ec2_sg.security_group_id]
+  security_group_ids  = [module.ssm_sg.security_group_id]
   private_dns_enabled = true
   tags                = merge(local.tags, { Name = "ssmmessages" })
 }
@@ -26,7 +52,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   service_name        = "com.amazonaws.${local.region}.ec2messages"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.ec2_sg.security_group_id]
+  security_group_ids  = [module.ssm_sg.security_group_id]
   private_dns_enabled = true
   tags                = merge(local.tags, { Name = "ec2messages" })
 }
@@ -43,7 +69,6 @@ resource "aws_vpc_endpoint" "s3" {
 ################################################################################
 # Latest Amazon Linux 2 AMI
 ################################################################################
-
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -64,20 +89,19 @@ module "ec2_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = ">= 5.3.0"
 
-  name        = "ssm-demo-ec2-sg"
-  description = "Allow SSM (443) and SSH (22)"
+  name        = "ec2"
+  description = "Security group for EC2 instance with SSM access"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_with_cidr_blocks = [
-    { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = "0.0.0.0/0" },
-    { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = "0.0.0.0/0" }
+  egress_cidr_blocks = ["10.10.0.0/16"]
+  egress_with_source_security_group_id = [
+    {
+      rule                     = "https-443-tcp"
+      source_security_group_id = module.ssm_sg.security_group_id
+    }
   ]
 
-  egress_with_cidr_blocks = [
-    { from_port = 0, to_port = 0, protocol = "-1", cidr_blocks = "0.0.0.0/0" }
-  ]
-
-  tags = local.tags
+  tags = merge(local.tags, { Name = "ec2-sg" })
 }
 
 ################################################################################
@@ -124,6 +148,7 @@ module "ec2_instance_private" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t3.micro"
   subnet_id              = module.vpc.private_subnets[0]
+  create_security_group  = false # Do not custom security group
   vpc_security_group_ids = [module.ec2_sg.security_group_id]
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
