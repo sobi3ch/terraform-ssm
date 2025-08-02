@@ -8,7 +8,7 @@ resource "aws_vpc_endpoint" "ssm" {
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.ec2_sg.security_group_id]
   private_dns_enabled = true
-  tags                = local.tags
+  tags                = merge(local.tags, { Name = "ssm" })
 }
 
 resource "aws_vpc_endpoint" "ssmmessages" {
@@ -18,7 +18,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.ec2_sg.security_group_id]
   private_dns_enabled = true
-  tags                = local.tags
+  tags                = merge(local.tags, { Name = "ssmmessages" })
 }
 
 resource "aws_vpc_endpoint" "ec2messages" {
@@ -28,7 +28,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.ec2_sg.security_group_id]
   private_dns_enabled = true
-  tags                = local.tags
+  tags                = merge(local.tags, { Name = "ec2messages" })
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -36,7 +36,7 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.${local.region}.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = module.vpc.private_route_table_ids
-  tags              = local.tags
+  tags              = merge(local.tags, { Name = "s3" })
 }
 
 
