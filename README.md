@@ -2,8 +2,8 @@
 This Terraform configuration sets up an EC2 instance with SSM access, banning SSH access.
 
 ### Usage
-1. Clone the repo & `cd` to it
-1. Update setting in locals (optional)
+1. Clone the repo & `cd` to it.
+1. Copy `variables.auto.tfvars.example` to `variables.auto.tfvars` and update if needed.
 1. `terraform init`
 1. `terrafrom plan`
 1. `terrafrom apply`
