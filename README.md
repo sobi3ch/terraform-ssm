@@ -4,6 +4,10 @@ This Terraform configuration sets up an EC2 instance inside private subnet where
 ### Purpose
 Just to prove, you don't need to have a bastion host, instance inside public subnet (with public IP), VPN or any other means to gain access to "disconnected" instance (with only private IP).
 
+### Requirements
+* [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions)
+* [terrafrom](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+
 ### Usage
 1. Clone the repo & `cd` to it.
 1. Copy `variables.auto.tfvars.example` to `variables.auto.tfvars` and update if needed.
