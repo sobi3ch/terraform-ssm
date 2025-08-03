@@ -1,5 +1,8 @@
 # EC2 Instance with SSM access
-This Terraform configuration sets up an EC2 instance with SSM access, banning SSH access.
+This Terraform configuration sets up an EC2 instance inside private subnet where only access is thought Systems Manager.
+
+### Purpose
+Just to prove, you don't need to have a bastion host, instance inside public subnet (with public IP), VPN or any other means to gain access to "disconnected" instance (with only private IP).
 
 ### Usage
 1. Clone the repo & `cd` to it.
